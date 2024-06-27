@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spring-boot-app
+  template:
+    metadata:
+      labels:
+        app: spring-boot-app
+    spec:
+      containers:
+        - name: spring-boot-container
+          image: taregsafi/location-attitude-longitude:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: OPENCAGE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: opencage-secret
+                  key: OPENCAGE_API_KEY
+          volumeMounts:
+            - name: resource-volume
+              mountPath: /data/GZ_GPS.txt
+              subPath: GZ_GPS.txt
+      volumes:
+        - name: resource-volume
+          configMap:
+            name: resource-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resource-config
+data:
+  GZ_GPS.txt: |
+    # Contents of GZ_GPS.txt file
